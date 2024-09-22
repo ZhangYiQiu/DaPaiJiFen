@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Body,
   Query,
 } from "@nestjs/common";
 import { RoomsService } from "./rooms.service";
@@ -15,18 +16,20 @@ import { TokenPayload } from "src/shared/entities/token-payload.entity";
 
 @Controller("rooms")
 export class RoomsController {
-  constructor(private readonly roomsService: RoomsService) {}
+  constructor(private readonly roomsService: RoomsService) { }
 
   @Post()
   @Auth(AuthType.Bearer)
-  async createRoom(@User() user: TokenPayload) {
-    return await this.roomsService.createRoom(user.name);
+  async createRoom(@User() user: TokenPayload, @Body("pass") pass: string) {
+    if (!pass) throw new ForbiddenException("The room password is required");
+    return await this.roomsService.createRoom(user.name, pass, user.sub);
   }
 
   @Get(":roomId")
   @Auth(AuthType.Bearer)
   async getRoomDetails(@Param("roomId") roomId: string) {
     const room = await this.roomsService.getRoom(roomId);
+    room.pass = '****'
     const roomUsers = await this.roomsService.getRoomUsers(roomId);
     const expenditureStats =
       await this.roomsService.getUsersExpenditureStats(roomId);
@@ -42,10 +45,13 @@ export class RoomsController {
 
   @Post("join/:roomId")
   @Auth(AuthType.Bearer)
-  async joinRoom(@User() user: TokenPayload, @Param("roomId") roomId: string) {
+  async joinRoom(@User() user: TokenPayload, @Param("roomId") roomId: string, @Body("pass") pass: string) {
     const isInRoom = await this.roomsService.isInRoom(user.sub, roomId);
     if (isInRoom) throw new ForbiddenException("You are already in the room");
-    return await this.roomsService.joinRoom(user.sub, roomId);
+    if (!pass) throw new ForbiddenException("You are input empty room password");
+    const checkPass = await this.roomsService.checkRoomPass(roomId, pass);
+    if (!checkPass) throw new ForbiddenException("You are input wrong room password");
+    return await this.roomsService.joinRoom(user.sub, roomId, pass);
   }
 
   @Get()
@@ -61,7 +67,11 @@ export class RoomsController {
 
   @Patch(":roomId/close")
   @Auth(AuthType.Bearer)
-  async closeRoom(@Param("roomId") roomId: string) {
-    return await this.roomsService.closeRoom(roomId);
+  async closeRoom(@Param("roomId") roomId: string, @User() user: TokenPayload) {
+    const check = await this.roomsService.checkRoomMaster(roomId, user.sub);
+    if (!check) throw new ForbiddenException("You are not room master");
+    const closeRoom = await this.roomsService.closeRoom(roomId, user.sub);
+    if (!closeRoom) throw new ForbiddenException("You don't have permission to close the room");
+    return closeRoom
   }
 }

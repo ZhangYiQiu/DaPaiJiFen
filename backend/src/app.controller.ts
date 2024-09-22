@@ -7,7 +7,7 @@ export class AppController {
   @Get()
   getMeta() {
     return {
-      name: "笨钟大学堂",
+      name: "游戏记账",
       version: "1.0.0",
     };
   }

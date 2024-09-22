@@ -3,7 +3,7 @@ import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class RoomsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async getRoom(roomId: string) {
     return await this.prisma.room.findUnique({
@@ -13,10 +13,12 @@ export class RoomsService {
     });
   }
 
-  async createRoom(userName: string) {
+  async createRoom(userName: string, pass: string, userId: string) {
     return await this.prisma.room.create({
       data: {
         name: `${userName}创建的房间`,
+        pass: pass,
+        master: userId
       },
     });
   }
@@ -30,7 +32,15 @@ export class RoomsService {
     });
   }
 
-  async joinRoom(userId: string, roomId: string) {
+  async checkRoomPass(roomId: string, pass: string) {
+    return await this.prisma.room.findFirst({
+      where: {
+        id: roomId,
+        pass: pass
+      },
+    });
+  }
+  async joinRoom(userId: string, roomId: string, pass: string) {
     return await this.prisma.roomUser.create({
       data: {
         roomId,
@@ -109,11 +119,19 @@ export class RoomsService {
       },
     });
   }
-
-  async closeRoom(roomId: string) {
+  async checkRoomMaster(roomId: string, userId: string) {
+    return await this.prisma.room.findFirst({
+      where: {
+        id: roomId,
+        master: userId
+      },
+    });
+  }
+  async closeRoom(roomId: string, userId: string) {
     return await this.prisma.room.update({
       where: {
         id: roomId,
+        master: userId
       },
       data: {
         active: false,

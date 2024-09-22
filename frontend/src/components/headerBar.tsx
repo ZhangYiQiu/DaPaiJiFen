@@ -5,7 +5,7 @@ const HeaderBar = () => {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          笨钟大学堂
+          游戏记账
         </Typography>
       </Toolbar>
     </AppBar>

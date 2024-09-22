@@ -17,6 +17,8 @@ export class ExpendituresController {
     @Param("payeeId") payeeId: string,
     @Param("amount") amount: number,
   ) {
+    if(payeeId == user.sub) 
+      throw new ForbiddenException("Can't pay yourself");
     if (amount <= 0)
       throw new ForbiddenException("Amount must be greater than 0");
     return await this.expendituresService.createExpenditure(

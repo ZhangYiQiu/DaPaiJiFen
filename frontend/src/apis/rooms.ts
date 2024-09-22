@@ -38,6 +38,7 @@ interface CreateRoomResponse {
 interface RoomListItem {
   id: string;
   name: string;
+  master: string
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -49,13 +50,13 @@ interface GetRoomsResponse {
 }
 
 export const ROOMS_API = {
-  CREATE_ROOM: (): Res<CreateRoomResponse> => http.post(`/rooms`),
+  CREATE_ROOM: (pass: string): Res<CreateRoomResponse> => http.post(`/rooms`, { pass }),
   GET_ROOMS: (payload: Pagination): Res<GetRoomsResponse> =>
     http.get(`/rooms`, { params: payload }),
   GET_USERS: (roomId: string): Res<User[]> =>
     http.get(`/rooms/${roomId}/users`),
   ROOM_DETAIL: (id: string): Res<RoomDetailResponse> =>
     http.get(`/rooms/${id}`),
-  JOIN_ROOM: (id: string) => http.post(`/rooms/join/${id}`),
+  JOIN_ROOM: (id: string, pass: string) => http.post(`/rooms/join/${id}`, { pass }),
   CLOSE_ROOM: (id: string) => http.patch(`/rooms/${id}/close`),
 };

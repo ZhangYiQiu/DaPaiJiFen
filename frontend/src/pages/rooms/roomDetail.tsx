@@ -11,6 +11,7 @@ import {
   CardContent,
   IconButton,
   Typography,
+  TextField
 } from "@mui/material";
 import { useUser } from "../../stores/user";
 import { ArrowBackIosNew } from "@mui/icons-material";
@@ -32,6 +33,7 @@ const RoomDetail = () => {
   const [room, setRoom] = useImmer<Room | undefined>(undefined);
 
   const [expenditures, setExpenditures] = useImmer<Expenditure[]>([]);
+  const [pass, setPass] = useImmer<string>('');
 
   const getRoomDetail = async () => {
     try {
@@ -62,7 +64,12 @@ const RoomDetail = () => {
   const joinRoom = async () => {
     try {
       activate(true);
-      await ROOMS_API.JOIN_ROOM(id as string);
+      const password = pass;
+      if (!password) {
+        alert("请输入密码")
+        return;
+      }
+      await ROOMS_API.JOIN_ROOM(id as string, password);
       await getRoomDetail();
     } catch {
       console.error("Failed to join room");
@@ -108,9 +115,26 @@ const RoomDetail = () => {
       ) : null}
 
       {users.find((user) => user.id == userId) ? null : (
-        <Button variant="contained" onClick={joinRoom} disabled={loading}>
-          加入房间
-        </Button>
+        <div className="m-8 flex flex-col space-y-8">
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            id="pass"
+            name="pass"
+            label="密码"
+            type="text"
+            fullWidth
+            variant="standard"
+            onChange={e => {
+              setPass(e.target.value)
+            }}
+          />
+
+          <Button variant="contained" onClick={joinRoom} disabled={loading}>
+            加入房间
+          </Button>
+        </div>
       )}
 
       {room?.active ? null : (
@@ -119,7 +143,7 @@ const RoomDetail = () => {
         </Alert>
       )}
 
-      {users.find((user) => user.id == userId) ? (
+      {users.find((user) => user.id == userId) && users.find((user) => user.id == userId) ? (
         <Card>
           <CardContent>
             <div className="flex flex-col space-y-4">
@@ -132,9 +156,9 @@ const RoomDetail = () => {
                       variant="outlined"
                       className="flex flex-col justify-center items-center"
                       onClick={() => callPayForm(item.id)}
-                      disabled={room?.active ? false : true}
+                      disabled={room?.active && userId!=item.id ? false : true}
                     >
-                      <Typography variant="body1">{item.name}</Typography>
+                      <Typography variant="body1">{item.name}{userId==item.id?"(你)":""}</Typography>
                       <Typography variant="body2">{item.amount}</Typography>
                     </Button>
                   );
@@ -145,7 +169,7 @@ const RoomDetail = () => {
         </Card>
       ) : null}
 
-      {expenditures.length ? (
+      {users.find((user) => user.id == userId) && expenditures.length ? (
         <div className="flex flex-col space-y-2">
           {expenditures.map((expenditure) => {
             return (
@@ -175,7 +199,7 @@ const RoomDetail = () => {
         </div>
       ) : null}
 
-      {room?.active ? (
+      {room?.active && room?.master == userId ? (
         <Button onClick={closeRoom} disabled={loading}>
           关闭房间
         </Button>

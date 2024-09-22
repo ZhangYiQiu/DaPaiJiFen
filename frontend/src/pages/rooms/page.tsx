@@ -10,6 +10,7 @@ import { ArrowBackIosNew } from "@mui/icons-material";
 export interface Room {
   id: string;
   name: string;
+  master: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;

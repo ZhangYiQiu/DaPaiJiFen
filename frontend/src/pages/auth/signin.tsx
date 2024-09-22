@@ -48,7 +48,7 @@ const SignInPage = () => {
   return (
     <div className="m-8">
       <form onSubmit={handleSignIn} className="flex flex-col space-y-8 w-full">
-        <Typography variant="h5">笨钟大学堂</Typography>
+        <Typography variant="h5">游戏记账</Typography>
         <Typography variant="h5">用户登录</Typography>
         {error ? <Alert severity="error">{error}</Alert> : null}
         <TextField

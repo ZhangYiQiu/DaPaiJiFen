@@ -7,8 +7,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle("笨钟大学堂")
-    .setDescription("笨钟大学堂 API")
+    .setTitle("游戏记账")
+    .setDescription("游戏记账 API")
     .setVersion("1.0")
     .build();
 

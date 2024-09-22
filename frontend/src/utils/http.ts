@@ -31,6 +31,9 @@ http.interceptors.response.use(
         router.navigate("/auth");
         return Promise.reject("Unauthorized");
       }
+      if(error.response?.data?.message){
+        alert(error.response?.data?.message)
+      }
     }
     return Promise.reject(error);
   }

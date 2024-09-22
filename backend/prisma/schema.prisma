@@ -21,6 +21,8 @@ model User {
 model Room {
   id     String  @id @default(uuid())
   name   String
+  pass   String
+  master   String
   active Boolean @default(true)
 
   createdAt DateTime @default(now())
